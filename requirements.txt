@@ -1,0 +1,8 @@
+torch>=2.1
+transformers>=4.44
+peft>=0.12
+accelerate>=0.33
+bitsandbytes>=0.43
+datasets>=2.20
+streamlit>=1.32
+pymupdf>=1.24
