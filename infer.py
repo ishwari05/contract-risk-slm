@@ -6,6 +6,11 @@ import json
 import os
 import sys
 from contextlib import nullcontext
+import logging
+import transformers
+
+transformers.logging.set_verbosity_error()
+
 
 import torch
 import torch.nn.functional as F

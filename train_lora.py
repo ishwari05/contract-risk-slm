@@ -61,7 +61,7 @@ def main():
         output_dir="outputs/checkpoints",
         per_device_train_batch_size=1, gradient_accumulation_steps=16,
         learning_rate=2e-4, num_train_epochs=1, lr_scheduler_type="cosine",
-        warmup_ratio=0.03, logging_steps=10, save_strategy="epoch",
+        warmup_steps=10, logging_steps=10, save_strategy="epoch",
         bf16=use_bf16, fp16=not use_bf16, optim="paged_adamw_8bit",
         gradient_checkpointing=True, report_to="none",
     )
