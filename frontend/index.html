@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClauseGuard AI — Contract Risk Intelligence</title>
+  <meta name="description" content="AI-assisted contract review and risk-intelligence platform for lawyers and legal teams. Powered by domain-adapted Qwen SLM.">
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <div id="app-shell">
+    <!-- Left Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <a href="#dashboard" class="sidebar-brand" id="brand-link">
+          <div class="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">ClauseGuard AI</span>
+            <span class="brand-tagline">Risk Intelligence</span>
+          </div>
+        </a>
+        <button id="sidebar-toggle-btn" class="sidebar-collapse-btn" title="Toggle Sidebar (Ctrl+B)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+
+        <a href="#contracts" class="nav-item" data-view="contracts">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </span>
+          <span class="nav-text">Contracts</span>
+        </a>
+
+        <a href="#review-queue" class="nav-item" data-view="review-queue">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+              <path d="M10 11l2 2 4-4"/>
+              <path d="M8 18h8"/>
+            </svg>
+          </span>
+          <span class="nav-text">Review Queue</span>
+          <span class="nav-badge" id="sidebar-queue-badge">18</span>
+        </a>
+
+        <a href="#analytics" class="nav-item" data-view="analytics">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </span>
+          <span class="nav-text">Analytics</span>
+        </a>
+
+        <a href="#feedback" class="nav-item" data-view="feedback">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <path d="M12 7v4"/>
+              <path d="M12 15h.01"/>
+            </svg>
+          </span>
+          <span class="nav-text">Feedback & Active Learning</span>
+        </a>
+
+        <div class="nav-section-title">System & Governance</div>
+
+        <a href="#transparency" class="nav-item" data-view="transparency">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </span>
+          <span class="nav-text">AI Transparency</span>
+        </a>
+
+        <a href="#trust" class="nav-item" data-view="trust">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
+          <span class="nav-text">Trust & Privacy</span>
+        </a>
+
+        <a href="#settings" class="nav-item" data-view="settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </span>
+          <span class="nav-text">Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="system-status-box" id="system-status-pill">
+          <div class="status-pulse-dot"></div>
+          <div class="status-text-wrap">
+            <span class="status-label">SLM Operational</span>
+            <span class="status-detail">RTX 4090 • T=0.94</span>
+          </div>
+        </div>
+
+        <a href="#trust" class="privacy-onprem-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Privacy: On-Prem</span>
+        </a>
+
+        <div class="user-profile-widget">
+          <div class="user-avatar">SJ</div>
+          <div class="user-meta">
+            <span class="user-name">Sarah Jenkins</span>
+            <span class="user-org">Apex Global Partners</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <main id="main-container">
+      <!-- Top Navigation -->
+      <header id="topbar">
+        <div class="topbar-left">
+          <button id="topbar-back-btn" class="back-to-contracts-btn" style="display: none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Back to Contracts</span>
+          </button>
+
+          <div class="breadcrumb-path">
+            <span id="breadcrumb-section">Workspace</span>
+            <span>/</span>
+            <span class="breadcrumb-active" id="breadcrumb-page">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="global-search-wrap">
+            <span class="search-icon-left">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+            <input type="text" id="global-search-input" class="search-input" placeholder="Search contracts, clauses...">
+            <span class="search-kbd">⌘K</span>
+          </div>
+
+          <button id="open-upload-btn" class="btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>+ Analyze Contract</span>
+          </button>
+
+          <button class="topbar-btn" id="notifications-btn" title="Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </button>
+
+          <button class="topbar-btn" id="help-btn" title="Documentation & Guidance">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </button>
+
+          <div class="user-avatar" style="cursor: pointer;" title="Sarah Jenkins (Lead Legal Counsel)">SJ</div>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container -->
+      <div id="view-content" class="view-container">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal -->
+  <div id="upload-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Analyze a Contract</h2>
+          <p style="font-size: 13px; color: var(--text-muted);">Upload a PDF or TXT to identify risky, ambiguous, and unusual clauses.</p>
+        </div>
+        <button id="close-upload-modal-btn" style="background: transparent; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="privacy-banner-card">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #065f46;">Private by design</div>
+            <div style="font-size: 12px; color: #047857;">Your document is processed locally. Client contract text never leaves your machine.</div>
+          </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div id="contract-drop-zone" class="drop-zone">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Drop your contract here</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">or click to browse files</div>
+          <span style="display: inline-block; padding: 4px 10px; background: #e2e8f0; border-radius: 4px; font-size: 11px; font-weight: 600; color: #475569;">
+            PDF / TXT • Extractable text required
+          </span>
+          <input type="file" id="file-input-element" accept=".pdf,.txt" style="display: none;">
+        </div>
+
+        <!-- Sample Contract Test Loaders -->
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Or test with sample agreement:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="sample-load-btn chip-btn" data-doc="acme-supplier-agreement">Acme Supplier Agreement.pdf</button>
+            <button class="sample-load-btn chip-btn" data-doc="cloudflare-enterprise-msa">Cloudflare Master Services Agreement.pdf</button>
+            <button class="sample-load-btn chip-btn" data-doc="snowflake-enterprise-dpa">Snowflake DPA.pdf</button>
+          </div>
+        </div>
+
+        <!-- Animated Progress Workflow (Hidden initially) -->
+        <div id="upload-workflow-container" style="display: none;">
+          <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; justify-content: space-between;">
+            <span id="workflow-current-stage">Running risk analysis...</span>
+            <span id="workflow-pct" style="color: var(--brand-primary);">0%</span>
+          </div>
+
+          <div class="progress-track" style="height: 6px; margin-bottom: 16px;">
+            <div id="workflow-progress-bar" class="progress-fill fill-high" style="width: 0%; background-color: var(--brand-accent);"></div>
+          </div>
+
+          <div class="upload-pipeline-steps" id="pipeline-steps-list">
+            <div class="pipeline-step-item" data-step="1">
+              <span class="step-indicator-circle">1</span>
+              <span>Uploading document</span>
+            </div>
+            <div class="pipeline-step-item" data-step="2">
+              <span class="step-indicator-circle">2</span>
+              <span>Extracting text</span>
+            </div>
+            <div class="pipeline-step-item" data-step="3">
+              <span class="step-indicator-circle">3</span>
+              <span>Detecting clauses</span>
+            </div>
+            <div class="pipeline-step-item" data-step="4">
+              <span class="step-indicator-circle">4</span>
+              <span>Running risk analysis</span>
+            </div>
+            <div class="pipeline-step-item" data-step="5">
+              <span class="step-indicator-circle">5</span>
+              <span>Calibrating confidence</span>
+            </div>
+            <div class="pipeline-step-item" data-step="6">
+              <span class="step-indicator-circle">6</span>
+              <span>Generating summaries</span>
+            </div>
+            <div class="pipeline-step-item" data-step="7">
+              <span class="step-indicator-circle">7</span>
+              <span>Preparing review queue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Logic Modules -->
+  <script src="/js/api.js"></script>
+  <script src="/js/state.js"></script>
+  <script src="/js/views/dashboard.js"></script>
+  <script src="/js/views/contracts.js"></script>
+  <script src="/js/views/clause_explorer.js"></script>
+  <script src="/js/views/review_queue.js"></script>
+  <script src="/js/views/review_mode.js"></script>
+  <script src="/js/views/analytics.js"></script>
+  <script src="/js/views/transparency.js"></script>
+  <script src="/js/views/report.js"></script>
+  <script src="/js/views/settings.js"></script>
+  <script src="/js/views/trust_center.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

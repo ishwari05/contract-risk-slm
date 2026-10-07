@@ -1,68 +1,114 @@
-# Contract Clause Risk-Flagging with a Domain-Adapted SLM
+# ClauseGuard AI
 
-Domain-adapted SLM for automated contract clause risk-flagging and summarization, with confidence-calibrated escalation of ambiguous clauses to human lawyers. Fully on-prem: no client text leaves your machine.
+**An Enterprise-Grade, On-Premise AI Contract Review & Risk Intelligence Platform**
 
-## 1. Architecture
+ClauseGuard AI is a domain-adapted Small Language Model (SLM) pipeline and web application designed for automated contract clause risk-flagging and summarization. Built for lawyers, legal teams, and compliance professionals, it offers confidence-calibrated escalation of ambiguous clauses to human reviewers. 
 
+**Privacy First**: Fully on-premise. No client text ever leaves your machine.
+
+---
+
+## 1. Features & Capabilities
+
+- **Intelligent Risk Flagging**: Classifies clauses into 13 distinct risk categories (e.g., Liability, Indemnification, Governing Law).
+- **Risk Tiers**: Automatically assigns High, Medium, or Low risk levels to extracted clauses.
+- **Confidence Calibration**: Uses temperature scaling to generate calibrated confidence scores.
+- **Smart Escalation**: Triages clauses with low confidence, low margin, or high-risk implications to a human lawyer review queue.
+- **Zero-Shot Summarization**: Generates concise, plain-English summaries of complex legal clauses.
+- **Active Learning**: Learns from human corrections through a local SQLite-backed feedback loop (`feedback.jsonl`) for continuous LoRA fine-tuning.
+- **Modern SaaS UI**: A polished, responsive, and professional frontend interface replacing traditional prototype dashboards.
+
+---
+
+## 2. System Architecture
+
+```text
+ PDF Contract
+     |
+     v
+ [1] Text Extraction (PyMuPDF blocks -> paragraphs)         infer.extract_pdf_text
+     |
+     v
+ [2] Clause Segmentation (blank-line paras, 60-220 words)   common.segment_contract
+     |
+     v
+ [3] SLM Classifier: Qwen2.5-7B-Instruct + QLoRA adapter    infer.ClauseAnalyzer
+     (One forward pass per clause -> logits over 13 labels)
+     |
+     v
+ [4] Calibration: softmax(logits / T) -> confidence, margin infer.decide
+     |
+     +--> Risk Tier = lookup(category) (High / Medium / Low)
+     |
+     +--> Escalate? conf < tau | margin < 0.15 | High-risk & conf < tau_high
+               |                                   
+               v yes                               
+           [5] Lawyer Review Queue (FastAPI + SQLite)      backend/main.py, backend/database.py
+               |                                   
+               v (Lawyer corrects/approves via UI)                                   
+           feedback.jsonl -> Next fine-tuning round (Active Learning Loop)
+               
+               v no
+           [6] Zero-Shot Summary (Adapter disabled)
+               |
+               v
+           ClauseGuard AI Web Application (FastAPI + HTML/CSS/JS Frontend)
 ```
- PDF contract
-     |
-     v
- [1] Text extraction (PyMuPDF blocks -> paragraphs)         infer.extract_pdf_text
-     |
-     v
- [2] Clause segmentation (blank-line paras, 60-220 words)   common.segment_contract
-     |
-     v
- [3] SLM classifier: Qwen2.5-7B-Instruct + QLoRA adapter    infer.ClauseAnalyzer
-     one forward pass per clause -> logits over 13 label letters (A..L, N=none)
-     |
-     v
- [4] Calibration: softmax(logits / T)  -> confidence, margin infer.decide
-     |
-     +--> risk tier = lookup(category)  (High / Medium / Low)
-     |
-     +--> escalate?  conf < tau | margin < 0.15 | High-risk & conf < tau_high
-     |         |                                   
-     |         v yes                               
-     |     [5] SQLite review queue  -->  lawyer corrects label in Streamlit  store.py, app.py
-     |         |                                   
-     |         v                                   
-     |     feedback.jsonl  -->  next fine-tuning round (active-learning loop)
-     v no
- [6] Zero-shot summary (same model, adapter disabled) for flagged clauses
-     |
-     v
- Streamlit dashboard (risk-sorted clauses, summaries, confidence, escalation reasons)
-```
 
-Key design choice: the classifier answers with a **single letter token**, so the model's next-token distribution over the label letters *is* a proper class-probability vector. No text parsing, and calibration is a clean 1-parameter problem.
+**Key ML Design Choice**: The classifier answers with a **single letter token** (A-L, N), ensuring the model's next-token distribution is a proper class-probability vector. No brittle text parsing is required, and calibration is reduced to a clean 1-parameter problem.
 
-## 2. Run order
+---
+
+## 3. Setup and Run Instructions
+
+### Prerequisites
+- NVIDIA GPU with ~16GB+ VRAM (e.g., RTX 4090, Colab T4) for 7B QLoRA.
+- Python 3.10+
+
+### Installation & Training
 
 ```bash
+# 1. Install dependencies
 pip install -r requirements.txt
-# CUAD: download CUAD_v1.zip from atticusprojectai.org/cuad (or Zenodo) and unzip -> CUAD_v1.json
 
-python data_prep.py --cuad CUAD_v1/CUAD_v1.json     # -> data/{train,val,test}.jsonl
-python train_lora.py                                # -> outputs/lora_adapter   (GPU, 4-bit)
-python calibrate.py --target_acc 0.95               # -> outputs/calibration.json + test report
-python infer.py some_contract.pdf                   # CLI check
-streamlit run app.py                                # dashboard
+# 2. Download CUAD Dataset
+# Download CUAD_v1.zip from atticusprojectai.org/cuad and unzip -> CUAD_v1.json
+
+# 3. Prepare Data
+python data_prep.py --cuad CUAD_v1/CUAD_v1.json     # Generates data/{train,val,test}.jsonl
+
+# 4. Train LoRA Adapter (GPU, 4-bit)
+python train_lora.py                                # Generates outputs/lora_adapter
+
+# 5. Calibrate Confidence Thresholds
+python calibrate.py --target_acc 0.95               # Generates outputs/calibration.json
 ```
 
-Compute: 7B QLoRA at seq-len <=1024, batch 1 x grad-accum 16 fits a 16 GB GPU (Colab/Kaggle T4). To iterate faster first, set `BASE_MODEL=Qwen/Qwen2.5-1.5B-Instruct` (Apache-2.0) and re-run the same commands.
+*(Tip: To iterate faster on lower-end hardware, change `BASE_MODEL=Qwen/Qwen2.5-1.5B-Instruct` in the scripts.)*
 
-## 3. Data processing
+### Running the Application
 
-- CUAD ships as SQuAD-style JSON: 510 contracts x 41 questions; each answer is a character span. Question ids end in `__<Category>`.
-- Contracts are cut into clause-sized chunks; each gold answer span is assigned to the chunk containing its midpoint. A chunk with several categories keeps the highest-risk one (single-label simplification; a multi-label head is a natural upgrade).
-- 12 risk-relevant categories + `None`. Splits are **by contract** (80/10/10) to avoid leakage.
-- Train set is rebalanced (1:1 negatives) and capped at 6,000 samples. Val/test keep 3:1 negatives to stay tractable.
-- **Caveat:** val/test are rebalanced, so the fitted threshold may be optimistic on a real contract's natural class distribution (most clauses are `None`). Re-check tau on a few fully-labelled contracts before relying on it.
-- LegalBench: not used for training here. Use its CUAD-derived and contract tasks (`nguha/legalbench` on Hugging Face, e.g. `cuad_*`, `contract_nli_*`) as an **out-of-distribution eval** of the adapter versus the base model; wire it in the same way as `calibrate.py` (build prompt -> label logits -> accuracy). The dataset's exact task/column names should be checked on the Hub before use.
+ClauseGuard AI uses a FastAPI backend and a custom HTML/JS frontend (no longer Streamlit).
 
-## 4. Model and fine-tuning
+```bash
+# Start the FastAPI Server
+uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
+Then navigate to `http://127.0.0.1:8000` in your browser.
+
+---
+
+## 4. Data Processing (CUAD)
+
+- **Source**: CUAD ships as SQuAD-style JSON (510 contracts x 41 questions).
+- **Segmentation**: Contracts are cut into clause-sized chunks. Each gold answer span is assigned to the chunk containing its midpoint. A chunk with several categories keeps the highest-risk one (simplifying to single-label).
+- **Splits**: By contract (80/10/10) to strictly avoid data leakage.
+- **Balancing**: The train set is rebalanced (1:1 negatives) and capped at 6,000 samples. Val/test keep 3:1 negatives.
+- **Caveat**: Because val/test are rebalanced, the fitted threshold may be optimistic on real contracts (where most clauses are `None`). Re-check `tau` on a fully-labeled contract before relying on it in production.
+
+---
+
+## 5. Model Details
 
 | Model | Params | License | Comment |
 |---|---|---|---|
@@ -71,22 +117,25 @@ Compute: 7B QLoRA at seq-len <=1024, batch 1 x grad-accum 16 fits a 16 GB GPU (C
 | Mistral 7B Instruct | 7B | Apache-2.0 | Solid, slightly older |
 | Phi-3 Mini (3.8B) | 3.8B | MIT | Cheapest to serve; expect lower accuracy on nuanced clauses |
 
-Fine-tuning: QLoRA (NF4 4-bit base, LoRA r=16, alpha=32, all attention + MLP projections, lr 2e-4, 1 epoch), loss on the answer token only. Summaries use the **base** model zero-shot (CUAD has no reference summaries). To fine-tune summarization too, distil ~1-2k summaries from a stronger model, have lawyers spot-check, then add a second task to the training mix.
+**Fine-Tuning Process**: QLoRA (NF4 4-bit base, LoRA r=16, alpha=32, all attention + MLP projections, lr 2e-4, 1 epoch), computing loss on the single answer token only. 
 
-## 5. Confidence calibration and escalation
+**Summaries**: Handled zero-shot using the **base** model (adapter disabled). 
+
+---
+
+## 6. Confidence Calibration & Escalation
 
 1. Take the logits of the first answer token restricted to the 13 label letters.
-2. **Temperature scaling**: fit one scalar T on the validation split by minimizing NLL (`calibrate.fit_temperature`); report ECE before/after.
-3. Confidence = max softmax(logits/T); margin = top-1 minus top-2.
-4. Threshold tau = lowest value whose auto-accepted validation predictions reach the target accuracy (default 95%).
-5. Escalate if confidence < tau, or margin < 0.15, or a High-risk prediction has confidence < max(tau, 0.90).
-6. Metrics to watch on test: accuracy on auto-handled clauses, coverage (share not escalated), and the share of true High-risk clauses that are **silently wrong**.
+2. **Temperature scaling**: Fit one scalar `T` on the validation split by minimizing NLL.
+3. Confidence = `max softmax(logits/T)`; Margin = `top-1` minus `top-2`.
+4. Threshold `tau` = lowest value whose auto-accepted validation predictions reach the target accuracy (default 95%).
+5. **Escalation Trigger**: Escalate if `confidence < tau`, OR `margin < 0.15`, OR a High-risk prediction has `confidence < max(tau, 0.90)`.
 
-Upgrades: conformal prediction sets for coverage guarantees; ensembling several LoRA seeds; token-level entropy for the generated summaries.
+---
 
-## 6. Limitations
+## 7. Limitations & Disclaimers
 
-- The category-to-risk mapping is a heuristic in `common.LABELS`; real risk depends on which party your client is. Have a lawyer own that table.
-- Extractive PDF only; scanned documents need OCR first. Multi-column layouts may need better extraction.
-- Outputs are decision support for lawyers, not legal advice.
-- Code was written to be run on a GPU machine and has not been benchmarked here; expect to tune batch size, sample cap and thresholds.
+- **Risk Mapping**: The category-to-risk mapping (`common.LABELS`) is a heuristic. Real risk depends on which party your client is representing. Have a qualified lawyer review and own that mapping table.
+- **PDF Extraction**: Extractive PDF only. Scanned documents require a separate OCR pipeline first.
+- **Not Legal Advice**: Outputs are decision-support tools for lawyers, **not** automated legal advice.
+- **Performance Tuning**: Expect to tune batch sizes, sample caps, and thresholds depending on your specific hardware and risk tolerance.
