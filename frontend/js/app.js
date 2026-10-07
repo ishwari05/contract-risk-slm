@@ -225,7 +225,35 @@ const App = {
 
   toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar) sidebar.classList.toggle('collapsed');
+    if (!sidebar) return;
+
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    sidebar.style.width = isCollapsed ? '72px' : '260px';
+
+    sidebar.querySelectorAll('.brand-info, .nav-text, .nav-section-title, .brand-tagline, .status-text-wrap, .user-meta, .user-name, .user-org, .privacy-onprem-pill span').forEach((el) => {
+      el.style.display = isCollapsed ? 'none' : '';
+    });
+
+    sidebar.querySelectorAll('.nav-item').forEach((item) => {
+      item.style.justifyContent = isCollapsed ? 'center' : '';
+      item.style.gap = isCollapsed ? '0' : '';
+      item.style.paddingLeft = isCollapsed ? '8px' : '';
+      item.style.paddingRight = isCollapsed ? '8px' : '';
+    });
+
+    sidebar.querySelectorAll('.sidebar-header').forEach((header) => {
+      header.style.justifyContent = isCollapsed ? 'center' : '';
+      header.style.padding = isCollapsed ? '14px 10px 12px' : '';
+    });
+
+    sidebar.querySelectorAll('.sidebar-footer').forEach((footer) => {
+      footer.style.padding = isCollapsed ? '12px 8px' : '';
+      footer.style.alignItems = isCollapsed ? 'center' : '';
+    });
+
+    sidebar.querySelectorAll('.user-profile-widget').forEach((profile) => {
+      profile.style.display = isCollapsed ? 'none' : '';
+    });
   },
 
   openUploadModal() {
